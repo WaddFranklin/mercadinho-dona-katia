@@ -3,8 +3,10 @@ Projeto: Mercadinho da Dona Kátia
 Autor: Franklin Nascimento | waddinsohn@gmail.com
 Data: 29/07/2022
 '''
-from datetime import datetime
+
+from datetime import timedelta
 from datetime import date
+from math import prod
 
 
 def describeProduct(attribs):
@@ -20,8 +22,8 @@ def describeProduct(attribs):
 class Color:
     SUCCESS = '\033[92m'  # green
     WARNING = '\033[93m'  # yellow
-    DANGER = '\033[91m'  # red
-    RESET = '\033[0m'    # default
+    DANGER = '\033[91m'   # red
+    RESET = '\033[0m'     # default
 
 
 class Estoque:
@@ -132,6 +134,35 @@ class Estoque:
         print("+------------------------------")
         print(self.listas)
 
+    def getProductsInValidity(self, listas, dayRange=30):
+        today = date.today()
+        dateLimit = today + timedelta(days=dayRange)
+        inValidity = []
+        for lista in listas.values():
+            for produto in lista.values():
+                data = produto.data_vencimento
+                if (data >= today) and (data <= dateLimit):
+                    inValidity.append(produto)
+        return inValidity
+
+    def printProductsInValidity(self, lista):
+        today = date.today()
+        title = 'Produtos com Vencimento em 30 dias'
+        space = int((76 - len(title)) / 2)
+        print("+" + "-"*76 + "+")
+        print("|" + ' '*space + title + ' '*space + '|')
+        print("+" + "-"*76 + "+")
+        for produto in lista:
+            dayRange = produto.data_vencimento - today
+            nomeMarca = produto.nome + " " + produto.marca
+            print("| {:>25} | R$ {:>8.2f} | {:>10} | {:>2} dias para vencer |".format(
+                nomeMarca, produto.preco, produto.getDataVencimento(), str(dayRange.days)))
+        print("+" + "-"*76 + "+")
+
+    def reportValidade(self):
+        inValidity = self.getProductsInValidity(self.listas)
+        self.printProductsInValidity(inValidity)
+
 
 class Produto:
 
@@ -157,6 +188,9 @@ class Produto:
                    "data_vencimento": self.data_vencimento,
                    "data_adicao": self.data_adicao}
         describeProduct(attribs)
+
+    def getDataVencimento(self):
+        return self.data_vencimento.strftime('%d/%m/%Y')
 
 
 class Alimento(Produto):
@@ -193,7 +227,7 @@ class Papelaria(Produto):
 estoque = Estoque()
 estoque.status()
 
-alimento = Alimento("miojo", "alimento", 1.99, "nissin", "01/01/2023", 100.0)
+alimento = Alimento("miojo", "alimento", 1.99, "nissin", "10/08/2022", 100.0)
 alimento.toString()
 estoque.add(alimento)
 
@@ -202,14 +236,27 @@ bebida.toString()
 estoque.add(bebida)
 
 papelaria = Papelaria("caixa de canetas", "papelaria",
-                      30.99, "bic", "01/01/2023", 50)
+                      30.99, "bic", "25/08/2022", 50)
 papelaria.toString()
 estoque.add(papelaria)
 
 estoque.status()
 
+data = date(2022, 9, 15)
+today = date.today()
+todayPlus30 = today + timedelta(days=30)
+print(todayPlus30)
+
+if (data >= today) and data <= todayPlus30:
+    print("Faltam 30 dias para vencer o produto!")
+elif data < today:
+    print("Produto vencido!")
+else:
+    print("Mais de 30 dias para vencer!")
+
 #estoque.remove("alimento", 1)
 #estoque.edit("alimento", 1)
 #estoque.edit("bebida", 2)
 #estoque.edit("papelaria", 3)
-#estoque.status()
+# estoque.status()
+estoque.reportValidade()
