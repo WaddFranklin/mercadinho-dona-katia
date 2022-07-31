@@ -5,8 +5,6 @@ Data: 29/07/2022
 '''
 from datetime import datetime
 from datetime import date
-from math import prod
-from sqlite3 import Date
 
 
 def describeProduct(attribs):
@@ -18,40 +16,111 @@ def describeProduct(attribs):
         else:
             print(f" {key}: {value}")
 
+
 class Color:
-    SUCCESS = '\033[92m' # green
-    WARNING = '\033[93m' # yellow
+    SUCCESS = '\033[92m'  # green
+    WARNING = '\033[93m'  # yellow
     DANGER = '\033[91m'  # red
     RESET = '\033[0m'    # default
 
+
 class Estoque:
     totalProdutos = 0
-    
+
     def __init__(self):
-        self.listaAlimentos = []
-        self.listaBebidas = []
-        self.listaPapelaria = []
+        self.listaAlimentos = {}
+        self.listaBebidas = {}
+        self.listaPapelaria = {}
+        self.listas = {
+            "alimento": self.listaAlimentos,
+            "bebida": self.listaBebidas,
+            "papelaria": self.listaPapelaria
+        }
 
     def add(self, produto):
         if (type(produto) is Alimento):
-            self.listaAlimentos.append(produto)
+            self.listaAlimentos[produto.id] = produto
         elif (type(produto) is Bebida):
-            self.listaBebidas.append(produto)
+            self.listaBebidas[produto.id] = produto
         elif (type(produto) is Papelaria):
-            self.listaPapelaria.append(produto)
+            self.listaPapelaria[produto.id] = produto
         else:
-            print(f"{Color.DANGER}[Erro]: O produto nao eh de um tipo valido.{Color.RESET}")
+            print(
+                f"{Color.DANGER}[Erro]: O produto nao eh de um tipo valido.{Color.RESET}")
             return False
-        
+
         print(f"{Color.SUCCESS}{produto.nome} {produto.marca} foi adicionado ao estoque com sucesso!{Color.RESET}")
         Estoque.totalProdutos += 1
         return True
-        
-    def remove(self):
-        pass
 
-    def edit():
-        pass
+    def getProduto(self, tipo, id):
+        tipo = tipo.lower()
+        if tipo in self.listas:
+            if id in self.listas[tipo]:
+                return [True, self.listas[tipo][id]]
+            else:
+                print(
+                    f"{Color.DANGER}[Erro]: O id deste produto nao esta cadastrado no estoque.{Color.RESET}")
+                return [False, None]
+        else:
+            print(
+                f"{Color.DANGER}[Erro]: O tipo de produto nao eh valido.{Color.RESET}")
+            return [False, None]
+
+    def remove(self, tipo, id):
+        existeProduto, _ = self.getProduto(tipo, id)
+        if existeProduto:
+            produto = self.listas[tipo].pop(id)
+            print(
+                f"{Color.SUCCESS}O produto {produto.nome} {produto.marca} foi removido com sucesso!{Color.RESET}")
+        else:
+            print(
+                f"{Color.DANGER}[Erro]: O tipo de produto nao eh valido.{Color.RESET}")
+            return False
+
+        Estoque.totalProdutos -= 1
+        return True
+
+    def editCheck(self, key, value):
+        if key in ['nome', 'marca']:
+            return str(value)
+        elif key in ['preco', 'peso', 'volume']:
+            return float(value)
+        elif key == 'quantidade':
+            return int(value)
+        elif key == 'data_vencimento':
+            return date(int(value[6:]), int(value[3:5]), int(value[:2]))
+        else:
+            print(
+                f"{Color.DANGER}[Erro]: O valor informado nao eh valido.{Color.RESET}")
+            return False
+
+    def edit(self, tipo, id):
+        existeProduto, produto = self.getProduto(tipo, id)
+        if existeProduto:
+            produto.toString()
+            option = input(">>> Qual propriedade deseja alterar? ").lower()
+            attribs = ['nome', 'preco', 'marca',
+                       'data_vencimento', 'peso', 'volume', 'quantidade']
+            if option in attribs:
+                value = input(">>> Digite o novo valor: ")
+                value = self.editCheck(option, value)
+                if value:
+                    oldValue = getattr(produto, option, value)
+                    setattr(produto, option, value)
+                    newValue = getattr(produto, option, value)
+                    print(f"{Color.SUCCESS}O(A) {option} do(a) produto foi alterado(a) de {Color.WARNING}'{oldValue}'{Color.SUCCESS} para {Color.WARNING}'{newValue}'{Color.SUCCESS} com sucesso!{Color.RESET}")
+                    produto.toString()
+                    return True
+
+            else:
+                print(
+                    f"{Color.DANGER}[Erro]: Nao eh possivel alterar a propriedade informada ou nao existe.{Color.RESET}")
+                return False
+        else:
+            print(
+                f"{Color.DANGER}[Erro]: O id deste produto nao esta cadastrado no estoque.{Color.RESET}")
+            return False
 
     def status(self):
         print("*** Status do Estoque ***")
@@ -61,12 +130,13 @@ class Estoque:
         print(f"| Total de bebidas: {len(self.listaBebidas)}")
         print(f"| Total de prod. de papelaria: {len(self.listaPapelaria)}")
         print("+------------------------------")
+        print(self.listas)
 
 
 class Produto:
-    
+
     idProduto = 0
-    
+
     def __init__(self, nome, tipo, preco, marca, data_vencimento):
         Produto.idProduto += 1
         self.id = Produto.idProduto
@@ -74,7 +144,8 @@ class Produto:
         self.tipo = tipo
         self.preco = preco
         self.marca = marca
-        self.data_vencimento = date(int(data_vencimento[6:]), int(data_vencimento[3:5]), int(data_vencimento[:2]))
+        self.data_vencimento = date(int(data_vencimento[6:]), int(
+            data_vencimento[3:5]), int(data_vencimento[:2]))
         self.data_adicao = date.today()
 
     def toString(self):
@@ -122,24 +193,23 @@ class Papelaria(Produto):
 estoque = Estoque()
 estoque.status()
 
-produto = Produto("cafe", "teste", 10.0, "melita", "01/01/2023")
-produto.toString()
-
-print("-------------------")
-alimento = Alimento("carne bovina", "alimento", 53.4, "friboi", "20/12/2022", 2000)
+alimento = Alimento("miojo", "alimento", 1.99, "nissin", "01/01/2023", 100.0)
 alimento.toString()
-
-print("-------------------")
-bebida = Bebida("vinho", "bebida", 53.4, "dom bosco", "20/12/2022", 1000)
-bebida.toString()
-
-print("-------------------")
-papelaria = Papelaria("caixa de canetas", "papelaria", 53.4, "bic", "20/12/2022", 100)
-papelaria.toString()
-print("-------------------")
 estoque.add(alimento)
+
+bebida = Bebida("vinho", "bebida", 10.0, "dom bosco", "01/09/2022", 1000.0)
+bebida.toString()
 estoque.add(bebida)
+
+papelaria = Papelaria("caixa de canetas", "papelaria",
+                      30.99, "bic", "01/01/2023", 50)
+papelaria.toString()
 estoque.add(papelaria)
-data = Date(2000, 1, 1)
-estoque.add(data)
+
 estoque.status()
+
+#estoque.remove("alimento", 1)
+#estoque.edit("alimento", 1)
+#estoque.edit("bebida", 2)
+#estoque.edit("papelaria", 3)
+#estoque.status()
