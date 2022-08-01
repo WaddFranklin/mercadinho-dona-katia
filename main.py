@@ -179,7 +179,8 @@ class Produto:
             data_vencimento[3:5]), int(data_vencimento[:2]))
         self.data_adicao = date.today()
 
-    def toString(self):
+    def __str__(self):
+        str = ""
         attribs = {"id": self.id,
                    "nome": self.nome,
                    "tipo": self.tipo,
@@ -187,7 +188,16 @@ class Produto:
                    "marca": self.marca,
                    "data_vencimento": self.data_vencimento,
                    "data_adicao": self.data_adicao}
-        describeProduct(attribs)
+        
+        for key, value in attribs.items():
+            if key == "preco":
+                str += f" {key}: R$ {value}\n"
+            elif key == "data_adicao" or key == "data_vencimento":
+                str += f" {key}: {value.strftime('%d/%m/%Y')}\n"
+            else:
+                str += f" {key}: {value}\n"
+        return str
+        
 
     def getDataVencimento(self):
         return self.data_vencimento.strftime('%d/%m/%Y')
@@ -198,9 +208,8 @@ class Alimento(Produto):
         super().__init__(nome, tipo, preco, marca, data_vencimento)
         self.peso = peso
 
-    def toString(self):
-        super().toString()
-        print(f" peso: {self.peso} g")
+    def __str__(self):
+        return super().__str__() + f" peso: {self.peso} g"
 
 
 class Bebida(Produto):
@@ -208,9 +217,8 @@ class Bebida(Produto):
         super().__init__(nome, tipo, preco, marca, data_vencimento)
         self.volume = volume
 
-    def toString(self):
-        super().toString()
-        print(f" volume: {self.volume} ml")
+    def __str__(self):
+        return super().__str__() + f" volume: {self.volume} ml"
 
 
 class Papelaria(Produto):
@@ -218,45 +226,31 @@ class Papelaria(Produto):
         super().__init__(nome, tipo, preco, marca, data_vencimento)
         self.quantidade = quantidade
 
-    def toString(self):
-        super().toString()
-        print(f" quantidade: {self.quantidade} unid.")
+    def __str__(self):
+        return super().__str__() + f" quantidade: {self.quantidade} unid."
 
 
 #  ---------------------- DEBUG ---------------------------
 estoque = Estoque()
-estoque.status()
+#estoque.status()
 
 alimento = Alimento("miojo", "alimento", 1.99, "nissin", "10/08/2022", 100.0)
-alimento.toString()
+print(alimento)
 estoque.add(alimento)
 
 bebida = Bebida("vinho", "bebida", 10.0, "dom bosco", "01/09/2022", 1000.0)
-bebida.toString()
+print(bebida)
 estoque.add(bebida)
 
-papelaria = Papelaria("caixa de canetas", "papelaria",
-                      30.99, "bic", "25/08/2022", 50)
-papelaria.toString()
+papelaria = Papelaria("caixa de canetas", "papelaria", 30.99, "bic", "25/08/2022", 50)
+print(papelaria)
 estoque.add(papelaria)
 
 estoque.status()
-
-data = date(2022, 9, 15)
-today = date.today()
-todayPlus30 = today + timedelta(days=30)
-print(todayPlus30)
-
-if (data >= today) and data <= todayPlus30:
-    print("Faltam 30 dias para vencer o produto!")
-elif data < today:
-    print("Produto vencido!")
-else:
-    print("Mais de 30 dias para vencer!")
 
 #estoque.remove("alimento", 1)
 #estoque.edit("alimento", 1)
 #estoque.edit("bebida", 2)
 #estoque.edit("papelaria", 3)
-# estoque.status()
+#estoque.status()
 estoque.reportValidade()
