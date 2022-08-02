@@ -11,9 +11,13 @@ from Estoque import *
 estoque = Estoque()
 # estoque.status()
 
-alimento = Alimento("miojo", "alimento", 1.99, "nissin", "10/08/2022", 100.0)
-print(alimento)
-estoque.add(alimento)
+alimento1 = Alimento("miojo", "alimento", 1.99, "nissin", "10/08/2022", 100.0)
+print(alimento1)
+estoque.add(alimento1)
+
+alimento2 = Alimento("feijao", "alimento", 4.53, "carioca", "13/09/2022", 1000.0)
+print(alimento2)
+estoque.add(alimento2)
 
 bebida = Bebida("vinho", "bebida", 10.0, "dom bosco", "01/09/2022", 1000.0)
 print(bebida)
@@ -32,3 +36,7 @@ estoque.status()
 #estoque.edit("papelaria", 3)
 # estoque.status()
 estoque.reportValidade()
+#estoque.reportCategoria('mes')
+
+#print(alimento1.__dict__)
+#printListAsTable("Produtos em Estoque", [alimento1, alimento2, bebida, papelaria])

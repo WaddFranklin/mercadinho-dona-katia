@@ -1,5 +1,5 @@
 from Produto import *
-from Util import Color
+from Util import *
 from datetime import timedelta
 
 
@@ -122,20 +122,39 @@ class Estoque:
                     inValidity.append(produto)
         return inValidity
 
-    def printProductsInValidity(self, lista):
-        today = date.today()
-        title = 'Produtos com Vencimento em 30 dias'
-        space = int((76 - len(title)) / 2)
-        print("+" + "-"*76 + "+")
-        print("|" + ' '*space + title + ' '*space + '|')
-        print("+" + "-"*76 + "+")
-        for produto in lista:
-            dayRange = produto.data_vencimento - today
-            nomeMarca = produto.nome + " " + produto.marca
-            print("| {:>25} | R$ {:>8.2f} | {:>10} | {:>2} dias para vencer |".format(
-                nomeMarca, produto.preco, produto.getDataVencimento(), str(dayRange.days)))
-        print("+" + "-"*76 + "+")
-
     def reportValidade(self):
         inValidity = self.getProductsInValidity(self.listas)
-        self.printProductsInValidity(inValidity)
+        printListAsTable("Produtos que vencem em 30 dias", inValidity)
+
+    def reportCategoria(self, mode='categoria'):
+        if mode == 'categoria':
+            categoria = input(
+                ">>> Informe qual categoria de produtos deseja listar: ")
+            if categoria in ['alimento', 'bebida', 'papelaria']:
+                lista = self.listas[categoria]
+                result = [produto for produto in lista.values()]
+                printListAsTable(f"Lista de {categoria}s", result)
+            else:
+                print(
+                    f"{Color.DANGER}[Erro]: A categoria de produto informada nao eh valida.{Color.RESET}")
+                return False
+        elif mode == 'mes':
+            result = []
+            mes = int(
+                input(">>> Informe qual o mês do ano que deseja listar (de 1 a 12): "))
+
+            if mes in range(1, 13):
+                for lista in self.listas.values():
+                    for produto in lista.values():
+                        if produto.data_vencimento.month == mes:
+                            result.append(produto)
+                printListAsTable(
+                    f"Produtos com vencimento no mes {mes}", result)
+            else:
+                print(
+                    f"{Color.DANGER}[Erro]: O mes informado nao eh valido.{Color.RESET}")
+                return False
+        else:
+            print(
+                f"{Color.DANGER}[Erro]: O modo especificado nao eh valido.{Color.RESET}")
+            return False
