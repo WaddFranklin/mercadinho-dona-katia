@@ -77,7 +77,7 @@ class Estoque:
     def edit(self, tipo, id):
         existeProduto, produto = self.getProduto(tipo, id)
         if existeProduto:
-            produto.toString()
+            print(produto)
             option = input(">>> Qual propriedade deseja alterar? ").lower()
             attribs = ['nome', 'preco', 'marca',
                        'data_vencimento', 'peso', 'volume', 'quantidade']
@@ -89,7 +89,6 @@ class Estoque:
                     setattr(produto, option, value)
                     newValue = getattr(produto, option, value)
                     print(f"{Color.SUCCESS}O(A) {option} do(a) produto foi alterado(a) de {Color.WARNING}'{oldValue}'{Color.SUCCESS} para {Color.WARNING}'{newValue}'{Color.SUCCESS} com sucesso!{Color.RESET}")
-                    produto.toString()
                     return True
 
             else:
@@ -125,15 +124,17 @@ class Estoque:
     def reportValidade(self):
         inValidity = self.getProductsInValidity(self.listas)
         printListAsTable("Produtos que vencem em 30 dias", inValidity)
+        input(">>> Pressione qualquer tecla para continuar")
 
     def reportCategoria(self, mode='categoria'):
         if mode == 'categoria':
             categoria = input(
-                ">>> Informe qual categoria de produtos deseja listar: ")
+                ">>> Informe qual categoria de produtos deseja listar (alimento/bebida/papelaria): ")
             if categoria in ['alimento', 'bebida', 'papelaria']:
                 lista = self.listas[categoria]
                 result = [produto for produto in lista.values()]
                 printListAsTable(f"Lista de {categoria}s", result)
+                input(">>> Pressione qualquer tecla para continuar")
             else:
                 print(
                     f"{Color.DANGER}[Erro]: A categoria de produto informada nao eh valida.{Color.RESET}")
@@ -150,6 +151,7 @@ class Estoque:
                             result.append(produto)
                 printListAsTable(
                     f"Produtos com vencimento no mes {mes}", result)
+                input(">>> Pressione qualquer tecla para continuar")
             else:
                 print(
                     f"{Color.DANGER}[Erro]: O mes informado nao eh valido.{Color.RESET}")
@@ -158,3 +160,12 @@ class Estoque:
             print(
                 f"{Color.DANGER}[Erro]: O modo especificado nao eh valido.{Color.RESET}")
             return False
+        
+    def list(self):
+        allProducts = []
+        for lista in self.listas.values():
+            for produto in lista.values():
+                allProducts.append(produto)
+        
+        printListAsTable('Produtos em Estoque', allProducts)
+        input(">>> Pressione qualquer tecla para continuar")

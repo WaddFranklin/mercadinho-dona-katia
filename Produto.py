@@ -1,6 +1,5 @@
 from datetime import date
 
-
 class Produto:
 
     idProduto = 0
