@@ -13,3 +13,5 @@ Para executar a aplicação, basta, dentro da pasta do projeto, digitar o comand
 ~~~python
 python3 main.py
 ~~~
+O console deverá mostrar uma tela como esta:
+![Tela Principal da aplicação](https://github.com/WaddFranklin/mercadinho-dona-katia/blob/master/mainScreen.png)
